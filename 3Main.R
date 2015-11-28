@@ -4,14 +4,15 @@
 # reg.nr. 900918-088-070
 # date: 20-10-2015
 
+setwd("~/Documents/github/ThesisScriptsR/")
 # Installing and loading packages
-source("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator/RScripts/1Packages.R")
+source("1Packages.R")
 
 # Functions
-source("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator/RScripts/2Functions2.R")
+source("2Functions2.R")
 
 # Setting the working directory
-setwd("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator/AppTests")
+setwd("~/Documents/00_Msc_Thesis/02_MeetRollator/AppTests")
 date <- ("2015-11-18")
 # Getting plot and statistics per file 
 stillGame <- timeseries("still_game.csv" ,date)

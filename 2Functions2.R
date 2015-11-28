@@ -90,21 +90,21 @@ timeseries <- function(x, date){
   tsAccz <-   xts(x = Acc$z, order.by=Acc$time, unique=T, frequency = freq)
   tsAccm <-   xts(x = Acc$m, order.by=Acc$time, unique=T, frequency = freq)
   tsAccg <-   xts(x = Acc$gforce, order.by=Acc$time, unique=T, frequency = freq)
-  tsAccsma <- xts(x = Acc$SMA, order.by=Acc$time, unique=T, frequency = freq)
-  tsAccv <-   xts(x = Acc$v, order.by=Acc$time, unique=T, frequency = freq)
+#   tsAccsma <- xts(x = Acc$SMA, order.by=Acc$time, unique=T, frequency = freq)
+#   tsAccv <-   xts(x = Acc$v, order.by=Acc$time, unique=T, frequency = freq)
   ## bind together
-  tsAcc <- cbind(tsAccx, tsAccy, tsAccz, tsAccm, tsAccg, tsAccsma, tsAccv, deparse.level = 1)
-  names(tsAcc) <- c("x", "y", "z", "m", "gforce", "SMA", "v")
-  print("Timeseries compiled with x,y,z,m,gforce,SMA,v")
-  
-  plot(tsAcc[,1], ylim=c(-2,2), major.ticks="minutes", main="Time Series Accelerometer")
-  lines(tsAcc[,2], col="red")
-  lines(tsAcc[,3], col="blue")
-  lines(tsAcc[,6], col="green")
+  tsAcc <- cbind(tsAccx, tsAccy, tsAccz, tsAccm, tsAccg,  deparse.level = 1)
+  names(tsAcc) <- c("x", "y", "z", "m", "gforce")
+  print("Timeseries compiled with x,y,z,m,gforce")
+  name <- deparse(substitute(x)) 
+  pdf(file =paste(name,".pdf"), width = 2.5 ,height = 3, pointsize = 7)
+  plot(tsAcc[,3], ylim=c(0,2), major.ticks="minutes", mar = c(0,0,0,0), main="", ylab="z-acceleration (m/s/s)", xlab="time")
+  legend(x = 'topleft', legend = c(paste(name)))
+  dev.off()
   return(tsAcc)
 }
 
-
+?plot
 ### Create time series of the accelerometer data frame with SMA
 timeseriessma <- function(x){
   # Load csv file
@@ -323,9 +323,10 @@ exportShp <- function(x) {
 ###########################################
 
 extract_rast <- function(x){
-  ahnwag <- raster(x ="D:/Niene_The_one_and_only/06_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/i39fn1.tif")
-  slopewag <- raster(x ="D:/Niene_The_one_and_only/06_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/slope_i39fn1.tif")
-  curvewag <- raster(x ="D:/Niene_The_one_and_only/06_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/curve_i39fn1.tif")
+  
+  ahnwag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/i39fn1.tif")
+  slopewag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/slope_i39fn1.tif")
+  curvewag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/curve_i39fn1.tif")
   location <- c(x$xc ,x$yc)
   height <- extract(x = ahnwag , y = location)
   slope <- extract(x = slopewag , y = location)

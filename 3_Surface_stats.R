@@ -11,7 +11,7 @@ source("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator/RScripts/1Packages.R
 source("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator/RScripts/2Functions.R")
 
 # Setting the working directory
-setwd("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator/3-11-surface")
+setwd("~/Documents/00_Msc_Thesis/02_MeetRollator/3-11-Surface")
 
 date <- "2015-11-03"
 

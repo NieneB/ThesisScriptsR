@@ -11,10 +11,13 @@ schaap <- createpoints("sept_schaap_clean","1_3Sept_MvSchaap/sept3s.csv", "2015-
 exportShp(schaap)
 head(schaap)
 
+ogrListLayers()
 
 ### Load data meetrollator test:
 setwd("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator")
-meetrollator03_11 <- createpoints("route_03_11_Meetrollator","3-11-surface/route.csv", "2015-11-3")
+setwd("~/Documents/00_Msc_Thesis/02_MeetRollator")
+
+meetrollator03_11 <- createpoints("route_03_11_Meetrollator","3-11-Surface/route.csv", "2015-11-3")
 ### drop all values after no location is specified. 
 meetrollator03_11 <- meetrollator03_11[!(is.na(meetrollator03_11$xc)) | !(is.na(meetrollator03_11$yc)),]
 ## Extract all values form the rasters
@@ -30,7 +33,6 @@ CPmeanheight <- CPheight(meetrollator03_11_plus)
 CPmeanSlope <- CPslope(meetrollator03_11_plus)
 CPmeanCurvature <- CPcurve(meetrollator03_11_plus)
 
-mean(meetrollator03_11_plus$height, na.rm=T )
 exportShp(CPmeanSpeed)
 exportShp(CPvarSpeed)
 exportShp(CPvarz)
@@ -39,9 +41,7 @@ exportShp(CPmeanheight)
 exportShp(CPmeanSlope)
 exportShp(CPmeanCurvature)
 exportShp(meetrollator03_11_plus)
-pdf(file = "CPmeanSpeed.pdf", width = 5 ,height = 3)
-plot(meetrollator03_11_plus$height)
-dev.off()
+
 savegraph(meetrollator03_11_plus)
 
 

@@ -12,7 +12,7 @@ source("1Packages.R")
 source("2Functions2.R")
 
 # Setting the working directory
-setwd("~/Documents/00_Msc_Thesis/02_MeetRollator/AppTests")
+setwd("~/Documents/00_Msc_Thesis")
 date <- ("2015-11-18")
 # Getting plot and statistics per file 
 stillGame <- timeseries("still_game.csv" ,date)
@@ -27,7 +27,7 @@ shakingui <- timeseries("shaking_UI.csv")
 shakinguiold <- timeseries("shaking_UI_oldversion.csv")
 schaap <- timeseries("schaap.csv")
 
-meetrollator <- timeseries("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator/2_9Sept_MeetRollator/meetrollator.csv")
+meetrollator <- timeseries("/02_MeetRollator/2_9Sept_MeetRollator/meetrollator.csv")
 
 test1 <- timeseries("2septactionthuisfiets.csv")
 test2 <- timeseries("2septhuisactionfiets.csv") 

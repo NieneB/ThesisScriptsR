@@ -26,10 +26,10 @@ AccPre <- function(x, date){
 
 ### Load GPS file and change time to CET tz OUTPUT: Dataframe of GPS with coordinates in RDnew
 gpsTimeSerie <- function(x){
-  GPS <- readOGR(dsn = "RollatorWalksClean.gdb", layer = x )
+  GPS <- readOGR(dsn = paste(x, '.shp', sep='' ), layer = x)
   dfGPS <- as.data.frame(GPS)
-  dfGPS$DateTime <- as.POSIXct(x = strptime(dfGPS$DateTime, format= "%Y-%m-%d %H:%M:%S"), tz="GMT")
-  attributes(dfGPS$DateTime)$tzone <- "CET"
+  dfGPS$DateTime <- as.POSIXct(x = strptime(dfGPS$time, format= "%Y-%m-%d %H:%M:%S"), tz="CET")
+  # attributes(dfGPS$DateTime)$tzone <- "CET"
   print("GPS file loaded as data frame")
   return(dfGPS)
 }
@@ -104,7 +104,7 @@ timeseries <- function(x, date){
   return(tsAcc)
 }
 
-?plot
+
 ### Create time series of the accelerometer data frame with SMA
 timeseriessma <- function(x){
   # Load csv file
@@ -159,10 +159,7 @@ savegraph <- function(x){
 
 ### Returns a list of the changepoints index number of the z-ax acceleration! 
 GetChangePointsVar <- function(cpx){  # x = accelerometer dataframe with column indication
-  name <- deparse(substitute(cpx)) 
-  pdf(file =paste(name,".pdf"), width = 5 ,height = 3, pointsize = 8)
   plot(cpx)
-  dev.off()
   summary(cpx)
   breakpoints <- cpx@cpts 
   var <- cpx@param.est$variance
@@ -171,73 +168,22 @@ GetChangePointsVar <- function(cpx){  # x = accelerometer dataframe with column 
 }
 
 GetChangePointsMean <- function(cpx){  # x = accelerometer dataframe with column idication
-  name <- deparse(substitute(cpx)) 
-  pdf(file =paste(name,".pdf"), width = 5 ,height = 3, pointsize = 8)
   plot(cpx)
-  dev.off()
   summary(cpx)
   breakpoints <- cpx@cpts 
-  var <- cpx@param.est$mean
-  r <- as.data.frame(cbind(breakpoints, var))
+  mean <- cpx@param.est$mean
+  r <- as.data.frame(cbind(breakpoints, mean))
   return(r)
 }
 
-### changepoints per feature characteristic
-CPspeedvar <- function(x){
-  cpx <- cpt.var(data = x$speed, method = "PELT")
-  cpx2 <- GetChangePointsVar(cpx)
-  rr <- GetAccData(x,cpx2)
-  return(rr)
-}
 
-CPspeedmean <- function(x){
-  cpx <- cpt.mean(data = x$speed, method = "PELT")
-  cpx2 <- GetChangePointsMean(cpx)
-  rr <- GetAccData(x,cpx2)
-  return(rr)
-}
 
-CPzvar <- function(x){
-  cpx <- cpt.var(data = x$z, method = "PELT")
-  cpx2 <- GetChangePointsVar(cpx)
-  rr <- GetAccData(x,cpx2)
-  return(rr)
-}
 
-CPzmean <- function(x){
-  cpx <- cpt.mean(data = x$z, method = "PELT")
-  cpx2 <- GetChangePointsMean(cpx)
-  rr <- GetAccData(x,cpx2)
-  return(rr)
-}
+################################################################################
+### Location & Export
+################################################################################
 
-CPheight <-  function(x){
-  x[is.na(x)] <- mean(x$height, na.rm=T)
-  plot(x$height)
-  cpx <- cpt.mean(data = x$height, method = "BinSeg")
-  cpx2 <- GetChangePointsMean(cpx)
-  rr <- GetAccData(x,cpx2)
-  return(rr)
-}
-
-CPslope <-  function(x){
-  x[is.na(x)] <- mean(x$slope, na.rm=T)
-  plot(x$slope)
-  cpx <- cpt.mean(data = x$slope, method = "BinSeg")
-  cpx2 <- GetChangePointsMean(cpx)
-  rr <- GetAccData(x,cpx2)
-  return(rr)
-}
-CPcurve <-  function(x){
-  x[is.na(x)] <- mean(x$curve, na.rm=T)
-  plot(x$curve)
-  cpx <- cpt.mean(data = x$curve, method = "PELT")
-  cpx2 <- GetChangePointsMean(cpx)
-  rr <- GetAccData(x,cpx2)
-  return(rr)
-}
-
-## Binds the changepoints to the Accelerometer data OUTPUT: A dataframe
+## Binds the changepoints to the Accelerometer data OUTPUT: as a dataframe
 GetAccData <- function(x, y){  ## Accelerometer, Changepoints
   df <- NULL
   for(i in 1:length(y$breakpoints)){
@@ -252,19 +198,19 @@ GetAccData <- function(x, y){  ## Accelerometer, Changepoints
 
 
 
-################################################################################
-### Location & Export
-################################################################################
+
 ### Create location for accelerometer file with the gps file. Match is on time. Works for breakpoints and normal data frames. Not spatial of timeseries!! Insert file name and workspace. 
+
 createpoints <- function(x , y, date){    #(gps, accelerometer file name)
   df <- NULL
   x <- gpsTimeSerie(x)
   y <- AccPre(y, date)
   y <- statistics(y)
-  
+ head(y)
   ### for every accpoint, get 2 GPS points.One before, one after
   for(i in 1:length(y$z)){
     timeacc <- as.POSIXct(y$time[i])
+    print(timeacc)
     s <- x[x$DateTime  < timeacc,] # dataframe with all values lower
     b <- x[x$DateTime  > timeacc,] # dataframe with all values larger
     l <- length(s$Id)
@@ -287,6 +233,7 @@ createpoints <- function(x , y, date){    #(gps, accelerometer file name)
     xc <- x1 + (Distance / sqrt( (y1-y2)^2 + (x1-x2)^2) ) * (x2-x1)  ## van Teije B 
     yc <- y1 + (Distance / sqrt( (y1-y2)^2 + (x1-x2)^2) ) * (y2-y1)  ## van Teije B
     
+    print(xc)
     ## If no coordinates give default coordinates
     if(length(xc)!=0 || length(yc)!=0){
       GPSpoint <- cbind(xc, yc)  
@@ -296,15 +243,20 @@ createpoints <- function(x , y, date){    #(gps, accelerometer file name)
       GPSpoint  <- cbind(xc,yc)
       }
     ## bind the coordinates and insert into new dataframe
+    print(y[i,])
+    print(GPSpoint)
+    print(speed)
     newrow <- cbind(y[i,], GPSpoint, speed)
     df <- as.data.frame(rbind(df, newrow))
     
     ## loop
     i <- i+1
+    print(i)
   }
   print("Dataframe created")
   return(df)
 }
+
 
 ## Export a data frame with xc and yc to Shapefile
 exportShp <- function(x) {
@@ -323,15 +275,23 @@ exportShp <- function(x) {
 ###########################################
 
 extract_rast <- function(x){
-  
-  ahnwag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/i39fn1.tif")
-  slopewag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/slope_i39fn1.tif")
-  curvewag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/curve_i39fn1.tif")
-  location <- c(x$xc ,x$yc)
+#   ahnwag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/i39fn1.tif")
+#   slopewag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/slope_i39fn1.tif")
+#   ruggedwag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/rudged_i39fn1.tif")
+  ahnwag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/i39fz1.tif")
+  slopewag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/slope_i39fz1.tif")
+  ruggedwag <- raster(x ="~/Documents/00_Msc_Thesis/02_GISanlayse/AHN2/Orgineel/Wageningen/rudged_i39fz1.tif")
+
+  location <- cbind(x$xc ,x$yc)
   height <- extract(x = ahnwag , y = location)
   slope <- extract(x = slopewag , y = location)
-  curvature <- extract(x = curvewag , y = location)
-  t <- cbind(x, height, slope, curvature)
+  #curvature <- extract(x = curvewag , y = location)
+  rugged <- extract(x=ruggedwag, y=location)
+  
+  height[is.na(height)] <- mean(height, na.rm=T)
+  slope[is.na(slope)] <- mean(slope, na.rm=T)
+  rugged[is.na(rugged)] <- mean(rugged, na.rm=T)
+  t <- cbind(x, height, slope, rugged) #
   print(head(t))
   return(t)
 }

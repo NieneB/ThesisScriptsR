@@ -26,7 +26,7 @@ pak(packages)
 # install.packages("corrgram")
 # install.packages("TTR")
 
-
+install.packages('rgdal')
 
 
 ### Loading packages
@@ -34,6 +34,7 @@ pak(packages)
 library(base)
 library(sp)
 library(rgdal)
+library(raster)
 
 # Timeseries:
 

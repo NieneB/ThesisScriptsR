@@ -24,6 +24,8 @@ newtermac <- rbind(termac_new_1, termac_new_2)
 newtermac <- descriptiveStats(newtermac)
 oldtermac <- descriptiveStats(termac_old_1)
 
+h <- as.data.frame(termac_old_1)
+hist(h$z, main='Histogram of z-ax acceleration \n tarmac (old)' , xlab='Acceleration m/s/s')
 
 GetChangePoints(termac) ## see if nescerarily?... .. . . 
 

@@ -1,77 +1,88 @@
-# This is the changepoint detection script for finding the location of the change point in the accelerometer data.
+# This is the changepoint detection script for testing several changepoint methods 
 # MSc Thesis GIS
 # author: Niene Boeijen
 # reg.nr. 900918-088-070
 # date: 12-11-2015
 # Change point detection and location
 
-
-## Load data walk with ms Schaap.
-schaap <- createpoints("sept_schaap_clean","1_3Sept_MvSchaap/sept3s.csv", "2015-09-03")
-exportShp(schaap)
-head(schaap)
-
-ogrListLayers()
-
 ### Load data meetrollator test:
-setwd("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator")
-setwd("~/Documents/00_Msc_Thesis/02_MeetRollator")
+## See other script
 
-meetrollator03_11 <- createpoints("route_03_11_Meetrollator","3-11-Surface/route.csv", "2015-11-3")
-### drop all values after no location is specified. 
-meetrollator03_11 <- meetrollator03_11[!(is.na(meetrollator03_11$xc)) | !(is.na(meetrollator03_11$yc)),]
-## Extract all values form the rasters
-meetrollator03_11_plus <- extract_rast(meetrollator03_11)
+setwd('~/Documents/00_Msc_Thesis/02_MeetRollator/1_MethodsComparison')
 
-plot(meetrollator03_11_plus$height)
-## Get all possible changepoints
-CPmeanSpeed <- CPspeedmean(meetrollator03_11_plus)
-CPvarSpeed <- CPspeedvar(meetrollator03_11_plus)
-CPvarz <- CPzvar(meetrollator03_11_plus)
-CPvarm <- CPzmean(meetrollator03_11_plus)
-CPmeanheight <- CPheight(meetrollator03_11_plus)
-CPmeanSlope <- CPslope(meetrollator03_11_plus)
-CPmeanCurvature <- CPcurve(meetrollator03_11_plus)
+### Comparison differnt method possibilities for speed data
+speed.PELT <- cpt.mean(meetrollator03_11_plus$speed, method = "PELT")
+speed.PELTm <- cpt.mean(meetrollator03_11_plus$speed, penalty = "Manual", pen.value = "1.5 * log(n)", method = "PELT")
+speed.SN <- cpt.mean(meetrollator03_11_plus$speed, penalty = "Manual", pen.value = "1.5 * log(n)", method = "SegNeigh") # computation time toooo hight!!!
+speed.BSm <- cpt.mean(meetrollator03_11_plus$speed, penalty = "Manual", pen.value = "1.5 * log(n)", method = "BinSeg") # not working.. don't know why
+speed.BS <- cpt.mean(meetrollator03_11_plus$speed, method = "BinSeg") 
+speed.varPELT <- cpt.var(meetrollator03_11_plus$speed, method = "PELT")
+speed.varPELTm <- cpt.var(meetrollator03_11_plus$speed, penalty = "Manual", pen.value = "1.5 * log(n)", method = "PELT")
+speed.mv <- cpt.meanvar(meetrollator03_11_plus$speed,method = "PELT")
 
-exportShp(CPmeanSpeed)
-exportShp(CPvarSpeed)
-exportShp(CPvarz)
-exportShp(CPvarm)
-exportShp(CPmeanheight)
-exportShp(CPmeanSlope)
-exportShp(CPmeanCurvature)
-exportShp(meetrollator03_11_plus)
+### Make the pdf file
+pdf(file =paste("comparisonMethodsSpeed.pdf"), width = 5 ,height = 6, pointsize = 10)
+par(mfrow=c(4,2), pin=c(3,3), mar=c(3,4,0,1))
 
-savegraph(meetrollator03_11_plus)
+plot(speed.PELT, ylab="Speed (m/s)", xlab ="Time index" )
+legend(legend = c("Speed", "Mean PELT"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+plot(speed.PELTm, ylab="Speed (m/s)", xlab ="Time index")
+legend(legend = c("Speed", "Mean PELT 1.5 * log(n)"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+
+plot(speed.BS, ylab="Speed (m/s)", xlab ="Time index")
+legend(legend = c("Speed", "Mean BinSeg"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+plot(speed.BSm, ylab="Speed (m/s)", xlab ="Time index")
+legend(legend = c("Speed", "Mean BinSeg 1.5 * log(n)"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+
+plot(speed.SN, ylab="Speed (m/s)", xlab ="Time index")
+legend(legend = c("Speed", "Mean SegNeigh"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+plot(speed.mv, ylab="Speed (m/s)", xlab ="Time index")
+legend(legend = c("Speed", "Mean Var PELT"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+
+plot(speed.varPELT, ylab="Speed (m/s)", xlab ="Time index")
+legend(legend = c("Speed", "Var PELT"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+plot(speed.varPELTm, ylab="Speed (m/s)", xlab ="Time index")
+legend(legend = c("Speed", "Var PELT 1.5 * log(n)"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+dev.off()
+
+#################
+### Comparison z-ax data
+z.varPELT <- cpt.var(meetrollator03_11_plus$z, method = "PELT")
+z.varPELTm <- cpt.var(meetrollator03_11_plus$z, penalty = "Manual", pen.value = "1.5 * log(n)", method = "PELT")
+z.BSm <- cpt.var(meetrollator03_11_plus$z, penalty = "Manual", pen.value = "1.5 * log(n)", method = "BinSeg") # not working.. don't know why
+z.BS <- cpt.var(meetrollator03_11_plus$z, method = "BinSeg") 
+
+z.PELT <- cpt.mean(meetrollator03_11_plus$z, method = "PELT")
+z.PELTm <- cpt.mean(meetrollator03_11_plus$z, penalty = "Manual", pen.value = "1.5 * log(n)", method = "PELT")
+
+z.SN <- cpt.mean(meetrollator03_11_plus$z, penalty = "Manual", pen.value = "1.5 * log(n)", method = "SegNeigh") # computation time toooo hight!!!
+z.mv <- cpt.meanvar(meetrollator03_11_plus$z,method = "PELT")
+
+### Make the pdf file
+pdf(file =paste("comparisonMethodsZax2.pdf"), width = 5 ,height = 6, pointsize = 10)
+par(mfrow=c(4,2), pin=c(3,3), mar=c(3,4,0,1))
+
+plot(z.varPELT, ylab="Acceleration (m/s/s)", xlab ="Time index")
+legend(legend = c("z", "Var PELT"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+plot(z.varPELTm, ylab="Acceleration (m/s/s)", xlab ="Time index")
+legend(legend = c("z", "Var PELT 1.5 * log(n)"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+
+plot(z.BS, ylab="Acceleration (m/s/s)", xlab ="Time index")
+legend(legend = c("z", "Var BinSeg"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+plot(z.BSm, ylab="Acceleration (m/s/s)", xlab ="Time index")
+legend(legend = c("z", "Var BinSeg 1.5 * log(n)"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+
+plot(z.PELT, ylab="Acceleration (m/s/s)", xlab ="Time index")
+legend(legend = c("z", "Mean PELT"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+plot(z.PELTm, ylab="Acceleration (m/s/s)", xlab ="Time index")
+legend(legend = c("z", "Mean 1.5 * log(n) PELT"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+
+plot(z.SN, ylab="Acceleration (m/s/s)", xlab ="Time index")
+legend(legend = c("z", "Mean SegNeigh"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+plot(z.mv, ylab="Acceleration (m/s/s))", xlab ="Time index")
+legend(legend = c("z", "MeanVar PELT"), x = "bottomright", lty = c(1,1), col = c("black", "red"), bg = "white", cex = 0.8)
+
+dev.off()
 
 
-### Load data bike route:
-setwd("D:/Niene_The_one_and_only/06_Thesis/02_MeetRollator")
-bike_route26_10var <- createpoints("bike_rd", "AppTests/bike_normal.csv","2015-10-26" )
-exportShp(bike_route26_10var)
-bike_route26_10_breakpointsvar <- GetChangePoints(bike_route26_10var)
-exportShp(bike_route26_10_breakpointsvar)
-g <- GetChangeSpeed("bike_rd")
 
-head(bike_route26_10_breakpointsvar)
-head(bike_route26_10var)
-
-library(scatterplot3d)
-install.packages("scatterplot3d")
-### Make 3D scatter plot
-head(bike_route26_10var)
-data <- as.data.frame(bike_route26_10var)
-scatterplot3d()
-scatterplot3d(x = data$xc, y = data$yc, z = data$z, 
-          type="l", 
-
-          main="bike ride acceleration in z-ax",
-          clab="speed m/s", d=2,
-          xlab = "x RDnew", ylab = "y RDnew",
-          zlab = "Acceleration in z-ax (m/s/s)"
-          )
-
-
-, theta = 0 ,phi = 60, 
-          bty = "g", pch = 20, cex = 1, alpha=0.5,
-          

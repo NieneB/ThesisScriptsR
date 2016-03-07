@@ -189,9 +189,9 @@ GetAccData <- function(x, y){  ## Accelerometer, Changepoints
   for(i in 1:length(y$breakpoints)){
     brp <- y$breakpoints[i]
     data <- x[brp,]
-    i <- i+1
     newrow <- cbind(y[i,],data)
     df <- rbind(df, newrow )
+    i <- i+1
   }
   return(df)
 } 
